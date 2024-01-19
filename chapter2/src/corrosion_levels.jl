@@ -65,7 +65,6 @@ function deviance(func, parameters_m1, func_m0, parameters_m0)
 end
 
 # Script
-
 engine_df = CSV.read(joinpath(@__DIR__, "../data/engine.csv"), DataFrame)
 
 n = length(engine_df[!, :CorrosionLevel])
@@ -94,5 +93,7 @@ println("Parameters estimations : ", result.estimates)
 println("variance-covariance matrix: ", result.var_cov_matrix)
 println("Standard-deviation : ", result.std)
 println("Confidence intervals : ", result.intervals)
+
+result = parameter_estimation(func, [1.0, 1.0])
 println("Mean failure time : ", mean_failure_time(corrosion_level, result.estimates, result.var_cov_matrix, true))
 println("Deviance : ", deviance(func, [1.0, 1.0], func_m0, [1.0]))
