@@ -15,10 +15,13 @@ struct OptimizedResult
     intervals::Array
 end
 
-function parameter_estimation(func, initial_parameters, to_round=false)
+"""
+    parameter_estimation(func::TwiceDifferentiable, initial_parameters::AbstractVector{<:Real}, to_round::Bool=false)
+    Fits a twice differentiable log-likelihood function of a generic model by maximum likelihood. 
+    Returns the estimates, the variance-covariance matrix, the standard errors and the 95% confidence intervals.
+"""
+function parameter_estimation(func::TwiceDifferentiable, initial_parameters::AbstractVector{<:Real}, to_round::Bool=false)
     opt = optimize(func, initial_parameters)
-
-    println("Minimum value is: ", opt.minimum)
 
     parameters = Optim.minimizer(opt)
     var_cov_matrix = variance_covariance_matrix(func, parameters)
@@ -43,7 +46,11 @@ function parameter_estimation(func, initial_parameters, to_round=false)
     return OptimizedResult(parameters, var_cov_matrix, std, intervals)
 end
 
-function mean_failure_time(corrosion_level, parameters, var_cov_matrix, to_round=false)
+"""
+    mean_failure_time(corrosion_level::Int64, parameters::AbstractVector{<:Real}, var_cov_matrix::AbstractMatrix{<:Real}, to_round::Bool=false)
+    Returns the mean failure time for a given corrosion level and maximum likelihood parameter estimates.
+"""
+function mean_failure_time(corrosion_level::Int64, parameters::AbstractVector{<:Real}, var_cov_matrix::AbstractMatrix{<:Real}, to_round::Bool=false)
     lambda = parameters[1]^-1 * corrosion_level^(-parameters[2])
     delta = [(-parameters[1]^(-2)) * corrosion_level^(-parameters[2]); (-parameters[1]^(-1)) * corrosion_level^(-parameters[2]) * log(corrosion_level)]
     deltaT = transpose(delta)
@@ -57,7 +64,11 @@ function mean_failure_time(corrosion_level, parameters, var_cov_matrix, to_round
     return mean_failure_time
 end
 
-function deviance(func, parameters_m1, func_m0, parameters_m0)
+"""
+    deviance(func::TwiceDifferentiable, parameters_m1::AbstractVector{<:Real}, func_m0::TwiceDifferentiable, parameters_m0::AbstractVector{<:Real})
+    Returns the deviance between two models and its estimated parameters.
+"""
+function deviance(func::TwiceDifferentiable, parameters_m1::AbstractVector{<:Real}, func_m0::TwiceDifferentiable, parameters_m0::AbstractVector{<:Real})
     opt_1 = optimize(func, parameters_m1).minimum
     opt_0 = optimize(func_m0, parameters_m0).minimum
 
